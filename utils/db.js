@@ -1,16 +1,17 @@
 import { MongoClient } from 'mongodb';
 
+// Get environment variables or use default values
 const DB_HOST = process.env.DB_HOST || 'localhost';
 const DB_PORT = process.env.DB_PORT || 27017;
 const DB_DATABASE = process.env.DB_DATABASE || 'files_manager';
-const connectionURL = `mongodb://${DB_HOST}:${DB_PORT}`;
+const connectionString = `mongodb://${DB_HOST}:${DB_PORT}`;
 
 /**
- * Class for handling operations with MongoDB.
+ * MongoDB client class to interact with the database
  */
-class MongoDBService {
+class DBClient {
   constructor() {
-    MongoClient.connect(connectionURL, { useUnifiedTopology: true }, (error, client) => {
+    MongoClient.connect(connectionString, { useUnifiedTopology: true }, (error, client) => {
       if (!error) {
         this.db = client.db(DB_DATABASE);
         this.usersCollection = this.db.collection('users');
@@ -23,30 +24,32 @@ class MongoDBService {
   }
 
   /**
-   * Verifies if the connection to MongoDB is active.
-   * @returns {boolean} true if connected, otherwise false.
+   * Checks if the MongoDB client is connected
+   * @returns {boolean} true if connected, false otherwise
    */
-  isConnected() {
+  isAlive() {
     return this.db !== null;
   }
 
   /**
-   * Gets the count of documents in the users collection.
-   * @returns {Promise<number>} The number of users.
+   * Retrieves the count of users in the users collection
+   * @returns {Promise<number>} The number of users
    */
-  async getUsersCount() {
-    return this.usersCollection.countDocuments();
+  async nbUsers() {
+    const userCount = await this.usersCollection.countDocuments();
+    return userCount;
   }
 
   /**
-   * Gets the count of documents in the files collection.
-   * @returns {Promise<number>} The number of files.
+   * Retrieves the count of files in the files collection
+   * @returns {Promise<number>} The number of files
    */
-  async getFilesCount() {
-    return this.filesCollection.countDocuments();
+  async nbFiles() {
+    const fileCount = await this.filesCollection.countDocuments();
+    return fileCount;
   }
 }
 
-const mongoDBService = new MongoDBService();
-
-export default mongoDBService;
+// Create and export an instance of DBClient
+const dbClient = new DBClient();
+export default dbClient;
