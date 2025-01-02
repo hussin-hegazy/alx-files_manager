@@ -1,12 +1,17 @@
-import express from 'express';
-import startServer from './libs/boot';
-import injectRoutes from './routes';
-import injectMiddlewares from './libs/middlewares';
+const express = require('express');
+const mongoose = require('mongoose');
+const redis = require('redis');
+const routes = require('./routes');
+const app = express();
+const PORT = process.env.PORT || 5000;
 
-const server = express();
+// Middleware
+app.use(express.json());
 
-injectMiddlewares(server);
-injectRoutes(server);
-startServer(server);
+// Load routes
+app.use('/', routes);
 
-export default server;
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
