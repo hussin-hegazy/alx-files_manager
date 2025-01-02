@@ -3,53 +3,50 @@ import { MongoClient } from 'mongodb';
 const DB_HOST = process.env.DB_HOST || 'localhost';
 const DB_PORT = process.env.DB_PORT || 27017;
 const DB_DATABASE = process.env.DB_DATABASE || 'files_manager';
-const url = `mongodb://${DB_HOST}:${DB_PORT}`;
+const connectionURL = `mongodb://${DB_HOST}:${DB_PORT}`;
 
 /**
- * Class for performing operations with Mongo service
+ * Class for handling operations with MongoDB.
  */
-class DBClient {
+class MongoDBService {
   constructor() {
-    MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
-      if (!err) {
-        // console.log('Connected successfully to server');
+    MongoClient.connect(connectionURL, { useUnifiedTopology: true }, (error, client) => {
+      if (!error) {
         this.db = client.db(DB_DATABASE);
         this.usersCollection = this.db.collection('users');
         this.filesCollection = this.db.collection('files');
       } else {
-        console.log(err.message);
-        this.db = false;
+        console.error(`Connection failed: ${error.message}`);
+        this.db = null;
       }
     });
   }
 
   /**
-   * Checks if connection to Redis is Alive
-   * @return {boolean} true if connection alive or false if not
+   * Verifies if the connection to MongoDB is active.
+   * @returns {boolean} true if connected, otherwise false.
    */
-  isAlive() {
-    return Boolean(this.db);
+  isConnected() {
+    return this.db !== null;
   }
 
   /**
-   * Returns the number of documents in the collection users
-   * @return {number} amount of users
+   * Gets the count of documents in the users collection.
+   * @returns {Promise<number>} The number of users.
    */
-  async nbUsers() {
-    const numberOfUsers = this.usersCollection.countDocuments();
-    return numberOfUsers;
+  async getUsersCount() {
+    return this.usersCollection.countDocuments();
   }
 
   /**
-   * Returns the number of documents in the collection files
-   * @return {number} amount of files
+   * Gets the count of documents in the files collection.
+   * @returns {Promise<number>} The number of files.
    */
-  async nbFiles() {
-    const numberOfFiles = this.filesCollection.countDocuments();
-    return numberOfFiles;
+  async getFilesCount() {
+    return this.filesCollection.countDocuments();
   }
 }
 
-const dbClient = new DBClient();
+const mongoDBService = new MongoDBService();
 
-export default dbClient;
+export default mongoDBService;
