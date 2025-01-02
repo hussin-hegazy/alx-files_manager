@@ -1,5 +1,3 @@
-// utils/db.js
-
 import mongodb from 'mongodb';
 // eslint-disable-next-line no-unused-vars
 import Collection from 'mongodb/lib/collection';
@@ -13,7 +11,7 @@ class DBClient {
    * Creates a new DBClient instance.
    */
   constructor() {
-    envLoader(); // تحميل المتغيرات البيئية
+    envLoader();
     const host = process.env.DB_HOST || 'localhost';
     const port = process.env.DB_PORT || 27017;
     const database = process.env.DB_DATABASE || 'files_manager';
@@ -64,6 +62,5 @@ class DBClient {
   }
 }
 
-// Create and export an instance of DBClient
 export const dbClient = new DBClient();
 export default dbClient;
