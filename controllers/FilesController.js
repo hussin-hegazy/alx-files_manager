@@ -4,6 +4,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+import mime from 'mime-types';
 
 class FilesController {
   static async postUpload(req, res) {
@@ -208,6 +209,39 @@ class FilesController {
     const updatedFile = await filesCollection.findOne({ _id: ObjectId(id) });
 
     return res.status(200).json(updatedFile);
+  }
+
+  static async getFile(req, res) {
+    const { id } = req.params;
+    const { size } = req.query;
+
+    const filesCollection = dbClient.db.collection('files');
+    const file = await filesCollection.findOne({ _id: ObjectId(id) });
+
+    if (!file) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    if (!file.isPublic && (!req.headers['x-token'] || !redisClient.get(`auth_${req.headers['x-token']}`))) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    if (file.type === 'folder') {
+      return res.status(400).json({ error: "A folder doesn't have content" });
+    }
+
+    let filePath = file.localPath;
+    if (size && ['500', '250', '100'].includes(size)) {
+      filePath = `${file.localPath}_${size}`;
+    }
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    const mimeType = mime.lookup(file.name) || 'text/plain';
+    res.setHeader('Content-Type', mimeType);
+    return res.status(200).sendFile(filePath);
   }
 }
 
