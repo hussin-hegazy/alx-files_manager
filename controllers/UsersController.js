@@ -1,12 +1,10 @@
 import sha1 from 'sha1';
-import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 
 class UsersController {
   static async postNew(req, res) {
     const { email, password } = req.body;
 
-    // 1. التحقق من وجود البريد الإلكتروني
     if (!email) {
       return res.status(400).json({ error: 'Missing email' });
     }
