@@ -1,5 +1,4 @@
 import sha1 from 'sha1';
-import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 
 class UsersController {
@@ -14,7 +13,11 @@ class UsersController {
       return res.status(400).json({ error: 'Missing password' });
     }
 
-    const usersCollection = dbClient.db.collection('users');
+    if (!dbClient.isAlive()) {
+      return res.status(500).json({ error: 'Database not connected' });
+    }
+
+    const usersCollection = dbClient.client.db(dbClient.dbName).collection('users');
     const user = await usersCollection.findOne({ email });
 
     if (user) {
@@ -28,7 +31,7 @@ class UsersController {
     };
 
     const result = await usersCollection.insertOne(newUser);
-    const userId = result.insertedId;
+    const userId = result.insertedId.toString();
 
     return res.status(201).json({ id: userId, email });
   }
