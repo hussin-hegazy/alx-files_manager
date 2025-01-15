@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import fs from 'fs';
 import path from 'path';
 import mime from 'mime-types';
+import { v4 as uuidv4 } from 'uuid';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
@@ -34,14 +35,18 @@ class FilesController {
 
     if (parentId !== '0') {
       const filesCollection = dbClient.db.collection('files');
-      const parentFile = await filesCollection.findOne({ _id: ObjectId(parentId) });
+      try {
+        const parentFile = await filesCollection.findOne({ _id: ObjectId(parentId) });
 
-      if (!parentFile) {
-        return res.status(400).json({ error: 'Parent not found' });
-      }
+        if (!parentFile) {
+          return res.status(400).json({ error: 'Parent not found' });
+        }
 
-      if (parentFile.type !== 'folder') {
-        return res.status(400).json({ error: 'Parent is not a folder' });
+        if (parentFile.type !== 'folder') {
+          return res.status(400).json({ error: 'Parent is not a folder' });
+        }
+      } catch (err) {
+        return res.status(400).json({ error: 'Invalid parentId' });
       }
     }
 
