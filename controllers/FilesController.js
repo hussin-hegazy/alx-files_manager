@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 import fs from 'fs';
 import path from 'path';
-import mime from 'mime-types';
+// import mime from 'mime-types';  // سيتم استخدامه لاحقًا
 import { v4 as uuidv4 } from 'uuid';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
