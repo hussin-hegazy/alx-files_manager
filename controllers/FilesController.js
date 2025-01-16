@@ -2,9 +2,10 @@ import { ObjectId } from 'mongodb';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import mime from 'mime-types';  // تم نقل هذا الاستيراد إلى الأعلى
+import mime from 'mime-types';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+import imageThumbnail from 'image-thumbnail';  // استيراد مكتبة image-thumbnail
 
 class FilesController {
   static async postUpload(req, res) {
@@ -92,6 +93,20 @@ class FilesController {
 
     const filesCollection = dbClient.db.collection('files');
     const result = await filesCollection.insertOne(newFile);
+
+    // إنشاء صور مصغرة إذا كان الملف صورة
+    if (type === 'image') {
+      const sizes = [500, 250, 100];
+      for (const size of sizes) {
+        const thumbnailPath = `${localPath}_${size}`;
+        try {
+          const thumbnail = await imageThumbnail(localPath, { width: size });
+          fs.writeFileSync(thumbnailPath, thumbnail);
+        } catch (err) {
+          console.error(`Error generating thumbnail for size ${size}:`, err);
+        }
+      }
+    }
 
     return res.status(201).json({
       id: result.insertedId,
