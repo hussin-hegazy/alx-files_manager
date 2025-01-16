@@ -12,7 +12,6 @@ const VALID_FILE_TYPES = {
   image: 'image',
 };
 const ROOT_FOLDER_ID = 0;
-const DEFAULT_ROOT_FOLDER = 'files_manager';
 const MAX_FILES_PER_PAGE = 20;
 
 class FilesController {
